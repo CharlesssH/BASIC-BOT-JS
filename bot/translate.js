@@ -32,7 +32,21 @@ const translations = {
         online: "Online",
         offline: "Offline",
         serverCreated: "Server Dibuat",
-        serverId: "ID Server"
+        serverId: "ID Server",
+        createChannelSuccess: "✅ Channel {channelName} berhasil dibuat di kategori {categoryName}!",
+        deleteChannelSuccess: "✅ Channel {channelName} berhasil dihapus!",
+        channelError: "❌ Terjadi kesalahan: {error}",
+        noPermission: "❌ Anda tidak memiliki izin untuk melakukan ini!",
+        invalidCategory: "❌ Kategori tidak ditemukan!",
+        invalidChannel: "❌ Channel tidak ditemukan!",
+        channelExists: "❌ Channel dengan nama tersebut sudah ada!",
+        selectCategory: "Pilih kategori untuk channel baru:",
+        provideName: "❌ Mohon berikan nama channel! Contoh: /createch general",
+        provideChannel: "❌ Mohon mention channel yang ingin dihapus! Contoh: /deletech #general",
+        createChannelDesc: 'Membuat channel baru',
+        deleteChannelDesc: 'Menghapus channel',
+        channelNameDesc: 'Nama channel yang akan dibuat',
+        channelToDeleteDesc: 'Channel yang akan dihapus'
     },
     english: {
         ping: "Your ping is {ping}ms.",
@@ -62,7 +76,21 @@ const translations = {
         online: "Online",
         offline: "Offline",
         serverCreated: "Server Created",
-        serverId: "Server ID"
+        serverId: "Server ID",
+        createChannelSuccess: "✅ Channel {channelName} has been created in {categoryName} category!",
+        deleteChannelSuccess: "✅ Channel {channelName} has been deleted!",
+        channelError: "❌ An error occurred: {error}",
+        noPermission: "❌ You don't have permission to do this!",
+        invalidCategory: "❌ Category not found!",
+        invalidChannel: "❌ Channel not found!",
+        channelExists: "❌ A channel with that name already exists!",
+        selectCategory: "Select a category for the new channel:",
+        provideName: "❌ Please provide a channel name! Example: /createch general",
+        provideChannel: "❌ Please mention the channel to delete! Example: /deletech #general",
+        createChannelDesc: 'Create a new channel',
+        deleteChannelDesc: 'Delete a channel',
+        channelNameDesc: 'The name of the channel',
+        channelToDeleteDesc: 'The channel to delete'
     },
     chinese: {
         ping: "您的延迟是 {ping}ms。",
@@ -92,7 +120,21 @@ const translations = {
         online: "在线",
         offline: "离线",
         serverCreated: "服务器创建时间",
-        serverId: "服务器ID"
+        serverId: "服务器ID",
+        createChannelSuccess: "✅ 频道 {channelName} 已在 {categoryName} 类别中创建！",
+        deleteChannelSuccess: "✅ 频道 {channelName} 已被删除！",
+        channelError: "❌ 发生错误：{error}",
+        noPermission: "❌ 您没有权限执行此操作！",
+        invalidCategory: "❌ 未找到类别！",
+        invalidChannel: "❌ 未找到频道！",
+        channelExists: "❌ 该名称的频道已存在！",
+        selectCategory: "选择新频道的类别：",
+        provideName: "❌ 请提供频道名称！示例：/createch general",
+        provideChannel: "❌ 请提及要删除的频道！示例：/deletech #general",
+        createChannelDesc: '创建新频道',
+        deleteChannelDesc: '删除频道',
+        channelNameDesc: '要创建的频道名称',
+        channelToDeleteDesc: '要删除的频道'
     },
     dutch: {
         ping: "Uw ping is {ping}ms.",
@@ -122,14 +164,43 @@ const translations = {
         online: "Online",
         offline: "Offline",
         serverCreated: "Server Aangemaakt",
-        serverId: "Server-ID"
+        serverId: "Server-ID",
+        createChannelSuccess: "✅ Kanaal {channelName} is aangemaakt in categorie {categoryName}!",
+        deleteChannelSuccess: "✅ Kanaal {channelName} is verwijderd!",
+        channelError: "❌ Er is een fout opgetreden: {error}",
+        noPermission: "❌ Je hebt geen toestemming om dit te doen!",
+        invalidCategory: "❌ Categorie niet gevonden!",
+        invalidChannel: "❌ Kanaal niet gevonden!",
+        channelExists: "❌ Er bestaat al een kanaal met die naam!",
+        selectCategory: "Selecteer een categorie voor het nieuwe kanaal:",
+        provideName: "❌ Geef een kanaalnaam op! Voorbeeld: /createch general",
+        provideChannel: "❌ Vermeld het te verwijderen kanaal! Voorbeeld: /deletech #general",
+        createChannelDesc: 'Maak een nieuw kanaal',
+        deleteChannelDesc: 'Verwijder een kanaal',
+        channelNameDesc: 'De naam van het kanaal',
+        channelToDeleteDesc: 'Het kanaal om te verwijderen'
     }
 };
 
 module.exports = {
-    name: 'language',
-    description: 'Mengubah bahasa bot',
-    execute(message) {
+    data: {
+        name: 'language',
+        description: 'Mengubah bahasa bot',
+        toJSON() {
+            return {
+                name: this.name,
+                description: this.description,
+                description_localizations: {
+                    'id': 'Mengubah bahasa bot',
+                    'en-US': 'Change bot language',
+                    'zh-CN': '更改机器人语言',
+                    'nl': 'Verander bot taal'
+                }
+            };
+        }
+    },
+    
+    async execute(interaction) {
         const row = new ActionRowBuilder()
             .addComponents(
                 new StringSelectMenuBuilder()
@@ -163,15 +234,16 @@ module.exports = {
                     ]),
             );
 
-        message.reply({
+        await interaction.reply({
             content: 'Select your language / Pilih bahasa:',
-            components: [row]
+            components: [row],
+            ephemeral: true
         });
     },
 
 
-    getTranslation(userId, key, replacements = {}) {
-        const userLang = userLanguages.get(userId) || 'indonesia';
+    getTranslation(userId, key, replacements = {}, forceLang = null) {
+        const userLang = forceLang || userLanguages.get(userId) || 'indonesia';
         let text = translations[userLang][key] || translations['indonesia'][key];
         
         // Ganti placeholder dengan nilai yang sesuai
